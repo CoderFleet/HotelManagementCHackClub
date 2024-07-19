@@ -6,6 +6,12 @@
 #define MAX_NAME_LENGTH 50
 #define DATA_FILE "rooms.dat"
 #define MAX_HISTORY 10
+#define MAX_SERVICE_REQUESTS 5
+
+typedef struct {
+    char description[MAX_NAME_LENGTH];
+    int isCompleted;
+} ServiceRequest;
 
 typedef struct {
     int roomNumber;
@@ -13,6 +19,8 @@ typedef struct {
     char guestName[MAX_NAME_LENGTH];
     char reservationHistory[MAX_HISTORY][MAX_NAME_LENGTH];
     int historyCount;
+    ServiceRequest serviceRequests[MAX_SERVICE_REQUESTS];
+    int serviceRequestCount;
 } Room;
 
 Room rooms[MAX_ROOMS];
@@ -32,6 +40,9 @@ void clearReservationHistory(int roomNumber);
 void waitForUserInput();
 int authenticateAdmin();
 void displayAdminMenu();
+void addRoomService(int roomNumber);
+void viewRoomServiceRequests(int roomNumber);
+void markServiceRequestComplete(int roomNumber, int requestIndex);
 
 void initializeRooms() {
     for (int i = 0; i < MAX_ROOMS; i++) {
@@ -39,6 +50,7 @@ void initializeRooms() {
         rooms[i].isOccupied = 0;
         strcpy(rooms[i].guestName, "");
         rooms[i].historyCount = 0;
+        rooms[i].serviceRequestCount = 0;
     }
 }
 
@@ -77,7 +89,10 @@ void displayAdminMenu() {
     printf("2. Check Out\n");
     printf("3. View Reservation History\n");
     printf("4. Clear Reservation History\n");
-    printf("5. Logout\n");
+    printf("5. Add Room Service Request\n");
+    printf("6. View Room Service Requests\n");
+    printf("7. Mark Room Service Request Complete\n");
+    printf("8. Logout\n");
     printf("Enter your choice: ");
 }
 
@@ -198,6 +213,55 @@ void clearReservationHistory(int roomNumber) {
     waitForUserInput();
 }
 
+void addRoomService(int roomNumber) {
+    if (roomNumber > 0 && roomNumber <= MAX_ROOMS) {
+        if (rooms[roomNumber - 1].serviceRequestCount < MAX_SERVICE_REQUESTS) {
+            printf("Enter service request description: ");
+            char description[MAX_NAME_LENGTH];
+            fgets(description, MAX_NAME_LENGTH, stdin);
+            description[strcspn(description, "\n")] = '\0';
+            ServiceRequest newRequest;
+            strcpy(newRequest.description, description);
+            newRequest.isCompleted = 0;
+            rooms[roomNumber - 1].serviceRequests[rooms[roomNumber - 1].serviceRequestCount] = newRequest;
+            rooms[roomNumber - 1].serviceRequestCount++;
+            printf("Service request added for room %d.\n", roomNumber);
+        } else {
+            printf("Room %d has reached the maximum number of service requests.\n", roomNumber);
+        }
+    } else {
+        printf("Invalid room number.\n");
+    }
+    waitForUserInput();
+}
+
+void viewRoomServiceRequests(int roomNumber) {
+    if (roomNumber > 0 && roomNumber <= MAX_ROOMS) {
+        printf("Service Requests for Room %d:\n", roomNumber);
+        for (int i = 0; i < rooms[roomNumber - 1].serviceRequestCount; i++) {
+            printf("%d. %s - %s\n", i + 1, rooms[roomNumber - 1].serviceRequests[i].description,
+                   rooms[roomNumber - 1].serviceRequests[i].isCompleted ? "Completed" : "Pending");
+        }
+    } else {
+        printf("Invalid room number.\n");
+    }
+    waitForUserInput();
+}
+
+void markServiceRequestComplete(int roomNumber, int requestIndex) {
+    if (roomNumber > 0 && roomNumber <= MAX_ROOMS) {
+        if (requestIndex > 0 && requestIndex <= rooms[roomNumber - 1].serviceRequestCount) {
+            rooms[roomNumber - 1].serviceRequests[requestIndex - 1].isCompleted = 1;
+            printf("Service request %d for room %d marked as completed.\n", requestIndex, roomNumber);
+        } else {
+            printf("Invalid service request index.\n");
+        }
+    } else {
+        printf("Invalid room number.\n");
+    }
+    waitForUserInput();
+}
+
 void waitForUserInput() {
     printf("Press Enter to continue...");
     while (getchar() != '\n');
@@ -206,6 +270,7 @@ void waitForUserInput() {
 int main() {
     int choice;
     int roomNumber;
+    int requestIndex;
 
     initializeRooms();
     loadRooms();
@@ -221,7 +286,7 @@ int main() {
                         displayAdminMenu();
                         scanf("%d", &choice);
                         getchar();
-                        if (choice == 5) break;
+                        if (choice == 8) break;
                         switch (choice) {
                             case 1:
                                 checkIn();
@@ -240,6 +305,27 @@ int main() {
                                 scanf("%d", &roomNumber);
                                 getchar();
                                 clearReservationHistory(roomNumber);
+                                break;
+                            case 5:
+                                printf("Enter room number to add service request: ");
+                                scanf("%d", &roomNumber);
+                                getchar();
+                                addRoomService(roomNumber);
+                                break;
+                            case 6:
+                                printf("Enter room number to view service requests: ");
+                                scanf("%d", &roomNumber);
+                                getchar();
+                                viewRoomServiceRequests(roomNumber);
+                                break;
+                            case 7:
+                                printf("Enter room number to mark service request complete: ");
+                                scanf("%d", &roomNumber);
+                                getchar();
+                                printf("Enter service request index to mark complete: ");
+                                scanf("%d", &requestIndex);
+                                getchar();
+                                markServiceRequestComplete(roomNumber, requestIndex);
                                 break;
                             default:
                                 printf("Invalid choice, please try again.\n");
