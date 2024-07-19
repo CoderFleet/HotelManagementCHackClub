@@ -16,6 +16,8 @@ typedef struct {
 } Room;
 
 Room rooms[MAX_ROOMS];
+char adminUsername[] = "admin";
+char adminPassword[] = "password";
 
 void initializeRooms();
 void loadRooms();
@@ -28,6 +30,8 @@ void searchRoom();
 void viewReservationHistory(int roomNumber);
 void clearReservationHistory(int roomNumber);
 void waitForUserInput();
+int authenticateAdmin();
+void displayAdminMenu();
 
 void initializeRooms() {
     for (int i = 0; i < MAX_ROOMS; i++) {
@@ -60,14 +64,41 @@ void saveRooms() {
 
 void displayMenu() {
     printf("Hotel Management System\n");
+    printf("1. Admin Login\n");
+    printf("2. View Rooms\n");
+    printf("3. Search Room\n");
+    printf("4. Save and Exit\n");
+    printf("Enter your choice: ");
+}
+
+void displayAdminMenu() {
+    printf("Admin Menu\n");
     printf("1. Check In\n");
     printf("2. Check Out\n");
-    printf("3. View Rooms\n");
-    printf("4. Search Room\n");
-    printf("5. View Reservation History\n");
-    printf("6. Clear Reservation History\n");
-    printf("7. Save and Exit\n");
+    printf("3. View Reservation History\n");
+    printf("4. Clear Reservation History\n");
+    printf("5. Logout\n");
     printf("Enter your choice: ");
+}
+
+int authenticateAdmin() {
+    char username[MAX_NAME_LENGTH];
+    char password[MAX_NAME_LENGTH];
+
+    printf("Enter admin username: ");
+    fgets(username, MAX_NAME_LENGTH, stdin);
+    username[strcspn(username, "\n")] = '\0';
+
+    printf("Enter admin password: ");
+    fgets(password, MAX_NAME_LENGTH, stdin);
+    password[strcspn(password, "\n")] = '\0';
+
+    if (strcmp(username, adminUsername) == 0 && strcmp(password, adminPassword) == 0) {
+        return 1;
+    } else {
+        printf("Invalid credentials.\n");
+        return 0;
+    }
 }
 
 void checkIn() {
@@ -185,30 +216,45 @@ int main() {
         getchar();
         switch (choice) {
             case 1:
-                checkIn();
+                if (authenticateAdmin()) {
+                    while (1) {
+                        displayAdminMenu();
+                        scanf("%d", &choice);
+                        getchar();
+                        if (choice == 5) break;
+                        switch (choice) {
+                            case 1:
+                                checkIn();
+                                break;
+                            case 2:
+                                checkOut();
+                                break;
+                            case 3:
+                                printf("Enter room number to view reservation history: ");
+                                scanf("%d", &roomNumber);
+                                getchar();
+                                viewReservationHistory(roomNumber);
+                                break;
+                            case 4:
+                                printf("Enter room number to clear reservation history: ");
+                                scanf("%d", &roomNumber);
+                                getchar();
+                                clearReservationHistory(roomNumber);
+                                break;
+                            default:
+                                printf("Invalid choice, please try again.\n");
+                                waitForUserInput();
+                        }
+                    }
+                }
                 break;
             case 2:
-                checkOut();
-                break;
-            case 3:
                 viewRooms();
                 break;
-            case 4:
+            case 3:
                 searchRoom();
                 break;
-            case 5:
-                printf("Enter room number to view reservation history: ");
-                scanf("%d", &roomNumber);
-                getchar();
-                viewReservationHistory(roomNumber);
-                break;
-            case 6:
-                printf("Enter room number to clear reservation history: ");
-                scanf("%d", &roomNumber);
-                getchar();
-                clearReservationHistory(roomNumber);
-                break;
-            case 7:
+            case 4:
                 saveRooms();
                 printf("Data saved. Exiting...\n");
                 exit(0);
