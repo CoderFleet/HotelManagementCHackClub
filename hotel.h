@@ -4,7 +4,13 @@
 #define MAX_ROOMS 100
 #define MAX_NAME_LENGTH 100
 #define MAX_SERVICE_REQUESTS 10
+#define USER_FILE "users.txt"
 #define DATA_FILE "rooms.dat"
+
+typedef struct {
+    char description[MAX_NAME_LENGTH];
+    int isCompleted;
+} ServiceRequest;
 
 typedef struct {
     int roomNumber;
@@ -12,14 +18,13 @@ typedef struct {
     char guestName[MAX_NAME_LENGTH];
     char reservationHistory[MAX_NAME_LENGTH][MAX_NAME_LENGTH];
     int historyCount;
-    struct {
-        char description[MAX_NAME_LENGTH];
-        int isCompleted;
-    } serviceRequests[MAX_SERVICE_REQUESTS];
+    ServiceRequest serviceRequests[MAX_SERVICE_REQUESTS];
     int serviceRequestCount;
     double roomPrice;
     char roomType[MAX_NAME_LENGTH];
 } Room;
+
+extern Room rooms[MAX_ROOMS];
 
 void initializeRooms();
 void loadRooms();

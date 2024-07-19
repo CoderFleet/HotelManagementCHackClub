@@ -2,117 +2,75 @@
 #include <stdlib.h>
 #include "hotel.h"
 #include "user.h"
-#include "file_io.h"
 #include "admin.h"
+#include "file_io.h"
+
+void displayMenu();
+void displayAdminMenu();
 
 int main() {
-    int choice;
-    int isAdmin;
-
     initializeRooms();
     loadRooms();
     loadUsers();
-
+    
+    int choice;
     while (1) {
         displayMenu();
         scanf("%d", &choice);
         getchar();
-
+        
         switch (choice) {
             case 1:
-                isAdmin = authenticateUser();
-                if (isAdmin) {
-                    while (1) {
-                        displayAdminMenu();
-                        scanf("%d", &choice);
-                        getchar();
-                        
-                        switch (choice) {
-                            case 1:
-                                checkIn();
-                                break;
-                            case 2:
-                                checkOut();
-                                break;
-                            case 3:
-                                {
-                                    int roomNumber;
-                                    printf("Enter room number to view reservation history: ");
-                                    scanf("%d", &roomNumber);
-                                    getchar();
-                                    viewReservationHistory(roomNumber);
-                                    break;
-                                }
-                            case 4:
-                                {
-                                    int roomNumber;
-                                    printf("Enter room number to clear reservation history: ");
-                                    scanf("%d", &roomNumber);
-                                    getchar();
-                                    clearReservationHistory(roomNumber);
-                                    break;
-                                }
-                            case 5:
-                                {
-                                    int roomNumber;
-                                    printf("Enter room number to add service request: ");
-                                    scanf("%d", &roomNumber);
-                                    getchar();
-                                    addRoomService(roomNumber);
-                                    break;
-                                }
-                            case 6:
-                                {
-                                    int roomNumber;
-                                    printf("Enter room number to view service requests: ");
-                                    scanf("%d", &roomNumber);
-                                    getchar();
-                                    viewRoomServiceRequests(roomNumber);
-                                    break;
-                                }
-                            case 7:
-                                {
-                                    int roomNumber, requestIndex;
-                                    printf("Enter room number to mark service request complete: ");
-                                    scanf("%d", &roomNumber);
-                                    getchar();
-                                    printf("Enter service request index to mark complete: ");
-                                    scanf("%d", &requestIndex);
-                                    getchar();
-                                    markServiceRequestComplete(roomNumber, requestIndex);
-                                    break;
-                                }
-                            case 9:
-                                manageUsers();
-                                break;
-                            default:
-                                printf("Invalid choice, please try again.\n");
-                                waitForUserInput();
-                        }
-                    }
-                }
+                checkIn();
                 break;
             case 2:
-                viewRooms();
+                checkOut();
                 break;
             case 3:
-                searchRoom();
+                viewRooms();
                 break;
             case 4:
-                saveRooms();
-                printf("Data saved. Exiting...\n");
-                exit(0);
+                searchRoom();
+                break;
             case 5:
-                generateReport();
+                displayAdminMenu();
                 break;
             case 6:
-                exportServiceRequestsToCSV();
-                break;
+                saveRooms();
+                return 0;
             default:
-                printf("Invalid choice, please try again.\n");
-                waitForUserInput();
+                printf("Invalid choice. Try again.\n");
+                break;
         }
     }
+}
 
-    return 0;
+void displayMenu() {
+    printf("1. Check In\n2. Check Out\n3. View Rooms\n4. Search Room\n5. Admin Menu\n6. Exit\n");
+}
+
+void displayAdminMenu() {
+    int choice;
+    while (1) {
+        printf("1. Generate Report\n2. Export Service Requests\n3. Manage Users\n4. Back\nEnter your choice: ");
+        scanf("%d", &choice);
+        getchar();
+        
+        switch (choice) {
+            case 1:
+                generateReport();
+                break;
+            case 2:
+                exportServiceRequestsToCSV();
+                break;
+            case 3:
+                // Implement manageUsers()
+                break;
+            case 4:
+                return;
+            default:
+                printf("Invalid choice. Try again.\n");
+                break;
+        }
+    }
 }
