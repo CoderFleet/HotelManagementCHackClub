@@ -4,6 +4,7 @@
 
 #define MAX_ROOMS 100
 #define MAX_NAME_LENGTH 50
+#define DATA_FILE "rooms.dat"
 
 typedef struct {
     int roomNumber;
@@ -14,6 +15,8 @@ typedef struct {
 Room rooms[MAX_ROOMS];
 
 void initializeRooms();
+void loadRooms();
+void saveRooms();
 void displayMenu();
 void checkIn();
 void checkOut();
@@ -29,13 +32,33 @@ void initializeRooms() {
     }
 }
 
+void loadRooms() {
+    FILE *file = fopen(DATA_FILE, "rb");
+    if (file == NULL) {
+        printf("No existing room data found, starting fresh.\n");
+        return;
+    }
+    fread(rooms, sizeof(Room), MAX_ROOMS, file);
+    fclose(file);
+}
+
+void saveRooms() {
+    FILE *file = fopen(DATA_FILE, "wb");
+    if (file == NULL) {
+        printf("Error saving room data.\n");
+        return;
+    }
+    fwrite(rooms, sizeof(Room), MAX_ROOMS, file);
+    fclose(file);
+}
+
 void displayMenu() {
     printf("Hotel Management System\n");
     printf("1. Check In\n");
     printf("2. Check Out\n");
     printf("3. View Rooms\n");
     printf("4. Search Room\n");
-    printf("5. Exit\n");
+    printf("5. Save and Exit\n");
     printf("Enter your choice: ");
 }
 
@@ -123,6 +146,7 @@ int main() {
     int choice;
 
     initializeRooms();
+    loadRooms();
 
     while (1) {
         displayMenu();
@@ -143,7 +167,8 @@ int main() {
                 searchRoom();
                 break;
             case 5:
-                printf("Exiting...\n");
+                saveRooms();
+                printf("Data saved. Exiting...\n");
                 exit(0);
             default:
                 printf("Invalid choice, please try again.\n");
